@@ -421,6 +421,11 @@ const fmtPct = v => pct.format(isFinite(v) ? v : 0) + '%';
 const FALLBACK = { selic: 14.75, ipca: 4.14, cdi: 14.65 };
 const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 horas
 
+// Converte taxa diária (% a.d.) para anual (% a.a.) base 252
+function diariaParaAnual(taxaDiariaPct) {
+  return (Math.pow(1 + taxaDiariaPct / 100, 252) - 1) * 100;
+}
+
 // Camada 4 — Cache em localStorage
 function lerCache(chave) {
   try {
@@ -513,22 +518,26 @@ async function carregarIndicadoresBACEN() {
   banner.innerHTML = '<span class="dot gray"></span> Buscando indicadores do Banco Central…';
   banner.className = 'banner loading';
 
-  // Selic=11, IPCA12m=13522, CDI=12
+  // Selic anualizada base 252=4189, IPCA12m=13522, CDI diário=12 (convertido para anual)
   const [rSelic, rIpca, rCdi] = await Promise.all([
-    buscarIndicador(11, FALLBACK.selic),
+    buscarIndicador(4189, FALLBACK.selic),
     buscarIndicador(13522, FALLBACK.ipca),
     buscarIndicador(12, FALLBACK.cdi),
   ]);
 
-  indicadoresBACEN = { selic: rSelic.valor, ipca: rIpca.valor, cdi: rCdi.valor };
+  // CDI série 12 retorna % ao dia — converte para % ao ano base 252
+  const cdiAnual = rCdi.fonte !== 'fallback' ? (Math.pow(1 + rCdi.valor / 100, 252) - 1) * 100 : rCdi.valor;
+  const rCdiAnual = { valor: cdiAnual, fonte: rCdi.fonte };
 
-  renderBanner(rSelic.valor, rIpca.valor, rCdi.valor, [rSelic.fonte, rIpca.fonte, rCdi.fonte]);
-  atualizarHints(rSelic.valor, rIpca.valor, rCdi.valor);
+  indicadoresBACEN = { selic: rSelic.valor, ipca: rIpca.valor, cdi: rCdiAnual.valor };
+
+  renderBanner(rSelic.valor, rIpca.valor, rCdiAnual.valor, [rSelic.fonte, rIpca.fonte, rCdiAnual.fonte]);
+  atualizarHints(rSelic.valor, rIpca.valor, rCdiAnual.valor);
   atualizarTudo();
 }
 
 async function tentarNovamente() {
-  ['bacen_11','bacen_13522','bacen_12'].forEach(k => localStorage.removeItem(k));
+  ['bacen_4189','bacen_13522','bacen_12'].forEach(k => localStorage.removeItem(k));
   await carregarIndicadoresBACEN();
 }
 
