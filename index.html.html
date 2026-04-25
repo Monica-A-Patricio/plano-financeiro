@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plano Financeiro Base — MP Gestão</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #0f172a;
+      --card: #111827;
+      --soft: #1e293b;
+      --line: #243247;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --green: #22c55e;
+      --blue: #38bdf8;
+      --violet: #8b5cf6;
+      --amber: #f59e0b;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #09101d 0%, #0b1220 100%);
+    }
+    .app { max-width: 1320px; margin: 0 auto; padding: 22px; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, rgba(56,189,248,.12), rgba(34,197,94,.08));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 12px;
+    }
+    h1,h2,h3 { margin: 0 0 10px; }
+    p { margin: 0 0 10px; color: #d1d5db; }
+
+    /* ── BANNER BACEN ── */
+    #banner-bacen-wrap {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 14px;
+    }
+    .banner {
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .banner.ok   { background: rgba(34,197,94,.1);  border: 1px solid #166534; color: #4ade80; }
+    .banner.warn { background: rgba(245,158,11,.1); border: 1px solid #92400e; color: #fbbf24; }
+    .banner.err  { background: rgba(239,68,68,.1);  border: 1px solid #991b1b; color: #f87171; }
+    .banner.loading { background: rgba(56,189,248,.08); border: 1px solid #27445c; color: #7dd3fc; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .dot.green  { background: #4ade80; box-shadow: 0 0 6px #4ade80; animation: pulse 2s infinite; }
+    .dot.yellow { background: #fbbf24; }
+    .dot.red    { background: #f87171; }
+    .dot.gray   { background: #94a3b8; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+    .banner a { color: inherit; }
+
+    /* ── TABS ── */
+    .tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+    .tab-btn {
+      border:1px solid var(--line); background:#0f172a; color:var(--text);
+      padding:10px 14px; border-radius:999px; cursor:pointer; font-size:14px;
+    }
+    .tab-btn.active { background: linear-gradient(90deg, #1d4ed8, #0ea5e9); border-color: #1d4ed8; }
+    .tab { display:none; }
+    .tab.active { display:block; }
+
+    /* ── GRID / CARDS ── */
+    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap:16px; }
+    .card {
+      grid-column: span 12;
+      background: rgba(17,24,39,.96);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    }
+    .col-3 { grid-column: span 3; }
+    .col-4 { grid-column: span 4; }
+    .col-5 { grid-column: span 5; }
+    .col-6 { grid-column: span 6; }
+    .col-7 { grid-column: span 7; }
+    .col-8 { grid-column: span 8; }
+    .col-12 { grid-column: span 12; }
+    @media (max-width: 1100px) { .col-3,.col-4,.col-5,.col-6,.col-7,.col-8 { grid-column: span 12; } }
+
+    .section-title { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; }
+    .badge { font-size:12px; color:#bae6fd; background:rgba(56,189,248,.08); border:1px solid #27445c; padding:6px 10px; border-radius:999px; white-space:nowrap; }
+
+    /* ── INPUTS ── */
+    .inputs { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
+    @media (max-width: 760px){ .inputs{ grid-template-columns:1fr; } }
+    label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+    input, select {
+      width:100%; padding:11px 12px; border-radius:12px; border:1px solid #334155;
+      background:#0b1220; color:var(--text); outline:none; font-size:14px;
+    }
+    input:focus, select:focus { border-color: #38bdf8; }
+    .hint { font-size:12px; color:var(--muted); margin-top:5px; }
+
+    /* ── KPIs ── */
+    .kpis { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; }
+    @media (max-width: 980px){ .kpis{ grid-template-columns: repeat(2,1fr);} }
+    @media (max-width: 600px){ .kpis{ grid-template-columns: 1fr;} }
+    .kpi { background:#0b1220; border:1px solid var(--line); border-radius:16px; padding:14px; }
+    .kpi .label { font-size:12px; color:var(--muted); }
+    .kpi .value { margin-top:6px; font-size:24px; font-weight:700; }
+    .good,.ok-text { color:#4ade80; }
+    .info{ color:#7dd3fc; }
+    .warn{ color:#fbbf24; }
+    .danger{ color:#f87171; }
+
+    /* ── RECOMENDAÇÕES ── */
+    .recommend { border-left:4px solid var(--blue); background:rgba(56,189,248,.08); border-radius:10px; padding:10px 12px; margin:10px 0; }
+    .recommend.warn  { border-left-color: var(--amber); background: rgba(245,158,11,.09); }
+    .recommend.red   { border-left-color: var(--red);   background: rgba(239,68,68,.09); }
+    .recommend.green { border-left-color: var(--green); background: rgba(34,197,94,.09); }
+
+    /* ── BUTTONS ── */
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    button {
+      border:none; border-radius:12px; padding:11px 14px; cursor:pointer;
+      color:white; font-weight:600; font-size:14px;
+      background:linear-gradient(90deg,#16a34a,#22c55e);
+    }
+    button.secondary { background:#1e293b; border:1px solid var(--line); }
+    button.blue   { background:linear-gradient(90deg,#2563eb,#0ea5e9); }
+    button.purple { background:linear-gradient(90deg,#6d28d9,#8b5cf6); }
+
+    /* ── TABLE ── */
+    table { width:100%; border-collapse: collapse; font-size:14px; }
+    th,td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); }
+    th { color:#cbd5e1; font-weight:600; }
+    .small { font-size:12px; color:var(--muted); margin-top:6px; }
+
+    /* ── BARRAS 50-30-20 ── */
+    .bars .row { margin-bottom:12px; }
+    .bar { width:100%; height:16px; background:#0b1220; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+    .bar > span { display:block; height:100%; }
+    .b50{ background:#38bdf8; } .b30{ background:#8b5cf6; } .b20{ background:#22c55e; }
+
+    /* ── CANVAS ── */
+    canvas { width:100%; max-width:100%; height:320px; background:#0b1220; border:1px solid var(--line); border-radius:16px; display:block; }
+
+    /* ── COMPARADOR ── */
+    .split { display:grid; grid-template-columns: 1.3fr .7fr; gap:16px; }
+    @media (max-width: 1100px){ .split{ grid-template-columns:1fr; } }
+    .scenario-list { display:grid; gap:10px; }
+    .scenario-item { background:#0b1220; border:1px solid var(--line); border-radius:14px; padding:12px; display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; }
+    .row-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* ── FOOTER ── */
+    .footer-note { margin-top:16px; font-size:12px; color:var(--muted); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>Plano Financeiro Base</h1>
+    <p>Ferramenta interativa para organização financeira, planejamento de aposentadoria, metas, reserva de emergência e comparação de cenários.</p>
+    <p class="small">Simule renda desejada aos 60, 65 ou qualquer idade, partindo de qualquer ponto. Indicadores do Banco Central atualizados automaticamente.</p>
+  </div>
+
+  <!-- BANNER BACEN -->
+  <div id="banner-bacen-wrap">
+    <div id="banner-bacen" class="banner loading">
+      <span class="dot gray"></span>
+      Buscando indicadores do Banco Central…
+    </div>
+  </div>
+
+  <!-- ABAS -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="plano">Plano Base</button>
+    <button class="tab-btn" data-tab="apos">Aposentadoria</button>
+    <button class="tab-btn" data-tab="reserva">Reserva</button>
+    <button class="tab-btn" data-tab="metas">Metas</button>
+    <button class="tab-btn" data-tab="comparador">Comparador</button>
+  </div>
+
+  <!-- ══════════════ ABA: PLANO BASE ══════════════ -->
+  <div id="plano" class="tab active">
+    <div class="grid">
+
+      <section class="card col-6">
+        <div class="section-title"><h2>Dados-base</h2><span class="badge">Personalizável</span></div>
+        <div class="inputs">
+          <div><label>Idade atual</label><input id="idadeAtual" type="number" min="14" max="90" value="20"></div>
+          <div><label>Idade alvo</label><input id="idadeApos" type="number" min="30" max="100" value="60"></div>
+          <div><label>Renda líquida mensal (R$)</label><input id="rendaLiquida" type="number" min="0" step="50" value="1750"></div>
+          <div><label>Despesas mensais (R$)</label><input id="despesas" type="number" min="0" step="50" value="1400"></div>
+          <div><label>Patrimônio atual (R$)</label><input id="patrimonioAtual" type="number" min="0" step="100" value="0"></div>
+          <div><label>Aporte mensal atual (R$)</label><input id="aporteAtual" type="number" min="0" step="50" value="350"></div>
+          <div><label>Perfil de renda</label>
+            <select id="perfilRenda">
+              <option value="clt">CLT / estável</option>
+              <option value="pj">PJ / autônomo</option>
+              <option value="variavel">Renda variável</option>
+            </select>
+          </div>
+          <div><label>Meses de reserva desejados</label><input id="mesesReserva" type="number" min="1" max="24" value="6"></div>
+        </div>
+        <div class="actions">
+          <button onclick="atualizarTudo()">Atualizar</button>
+          <button class="secondary" onclick="resetarPadrao()">Resetar</button>
+        </div>
+      </section>
+
+      <section class="card col-6">
+        <div class="section-title"><h2>Orçamento sugerido</h2><span class="badge">Regra 50-30-20</span></div>
+        <div class="bars">
+          <div class="row"><div>Necessidades: <strong id="orc50"></strong></div><div class="bar"><span class="b50" style="width:50%"></span></div></div>
+          <div class="row"><div>Desejos: <strong id="orc30"></strong></div><div class="bar"><span class="b30" style="width:30%"></span></div></div>
+          <div class="row"><div>Investimentos: <strong id="orc20"></strong></div><div class="bar"><span class="b20" style="width:20%"></span></div></div>
+        </div>
+        <div id="planoNotas"></div>
+      </section>
+
+      <section class="card col-12">
+        <div class="section-title"><h2>Indicadores gerais</h2><span class="badge">Saúde financeira</span></div>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Taxa de poupança</div><div class="value info" id="kpiPoupanca">0%</div></div>
+          <div class="kpi"><div class="label">Reserva ideal</div><div class="value good" id="kpiReservaIdeal">R$ 0</div></div>
+          <div class="kpi"><div class="label">Tempo para reserva</div><div class="value warn" id="kpiTempoReserva">0 meses</div></div>
+          <div class="kpi"><div class="label">Folga mensal</div><div class="value danger" id="kpiFolga">R$ 0</div></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ ABA: APOSENTADORIA ══════════════ -->
+  <div id="apos" class="tab">
+    <div class="grid">
+
+      <section class="card col-5">
+        <div class="section-title"><h2>Calculadora de aposentadoria</h2><span class="badge">Interativa</span></div>
+        <div class="inputs">
+          <div>
+            <label>Renda desejada na aposentadoria (R$/mês)</label>
+            <input id="rendaDesejada" type="number" min="0" step="100" value="5000">
+          </div>
+          <div>
+            <label>Taxa segura de retirada anual (%)</label>
+            <input id="tsr" type="number" min="2" max="8" step="0.1" value="4">
+            <div class="hint" id="hintTsr">Referência: Selic atual de <span id="hintSelicVal">—</span>% a.a.</div>
+          </div>
+          <div>
+            <label>Retorno nominal anual (%)</label>
+            <input id="retornoNominal" type="number" min="0" max="25" step="0.1" value="10">
+            <div class="hint" id="hintRetorno">CDI atual: <span id="hintCdiVal">—</span>% a.a.</div>
+          </div>
+          <div>
+            <label>Inflação anual (%)</label>
+            <input id="inflacao" type="number" min="0" max="20" step="0.1" value="4">
+            <div class="hint" id="hintInflacao">IPCA 12m atual: <span id="hintIpcaVal">—</span>%</div>
+          </div>
+          <div>
+            <label>Crescimento anual dos aportes (%)</label>
+            <input id="crescimentoAporte" type="number" min="0" max="30" step="0.5" value="3">
+          </div>
+          <div>
+            <label>Modo de cálculo</label>
+            <select id="modoCalculo">
+              <option value="real">Retorno real (nominal − inflação ajustado)</option>
+              <option value="nominal">Retorno nominal</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="blue" onclick="atualizarTudo()">Calcular</button>
+        </div>
+        <div id="aposNotas"></div>
+      </section>
+
+      <section class="card col-7">
+        <div class="section-title"><h2>Resultado</h2><span class="badge">Meta, aporte e renda</span></div>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Anos até a meta</div><div class="value info" id="kpiAnos">0</div></div>
+          <div class="kpi"><div class="label">Capital necessário</div><div class="value good" id="kpiCapital">R$ 0</div></div>
+          <div class="kpi"><div class="label">Aporte necessário</div><div class="value warn" id="kpiAporteNec">R$ 0</div></div>
+          <div class="kpi"><div class="label">Renda projetada</div><div class="value danger" id="kpiRendaProj">R$ 0</div></div>
+        </div>
+        <div id="diagnostico"></div>
+      </section>
+
+      <section class="card col-12">
+        <div class="section-title"><h2>Trajetória patrimonial</h2><span class="badge">Crescimento dos investimentos</span></div>
+        <canvas id="graficoApos" width="1100" height="320"></canvas>
+        <p class="small">Linha verde: patrimônio projetado · Linha azul tracejada: capital-alvo · Linha roxa: total aportado</p>
+      </section>
+
+      <section class="card col-12">
+        <div class="section-title"><h2>Simulações por idade de partida</h2><span class="badge">20 a 50 anos</span></div>
+        <table>
+          <thead><tr><th>Começando aos</th><th>Anos até a meta</th><th>Aporte necessário</th><th>Capital alvo</th></tr></thead>
+          <tbody id="tabelaPartidas"></tbody>
+        </table>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ ABA: RESERVA ══════════════ -->
+  <div id="reserva" class="tab">
+    <div class="grid">
+
+      <section class="card col-6">
+        <div class="section-title"><h2>Reserva de emergência</h2><span class="badge">Proteção</span></div>
+        <table>
+          <thead><tr><th>Indicador</th><th>Valor</th></tr></thead>
+          <tbody>
+            <tr><td>Despesas mensais</td><td id="rvDespesas">—</td></tr>
+            <tr><td>Meses desejados</td><td id="rvMeses">—</td></tr>
+            <tr><td>Reserva ideal</td><td id="rvIdeal">—</td></tr>
+            <tr><td>Tempo com aporte atual</td><td id="rvTempo">—</td></tr>
+          </tbody>
+        </table>
+        <div id="rvNotas"></div>
+      </section>
+
+      <section class="card col-6">
+        <div class="section-title"><h2>Leitura prática</h2><span class="badge">Ação</span></div>
+        <div id="rvRecs"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ ABA: METAS ══════════════ -->
+  <div id="metas" class="tab">
+    <div class="grid">
+
+      <section class="card col-5">
+        <div class="section-title"><h2>Calculadora de metas</h2><span class="badge">Objetivos</span></div>
+        <div class="inputs">
+          <div><label>Meta financeira (R$)</label><input id="metaValor" type="number" min="0" step="100" value="50000"></div>
+          <div><label>Prazo da meta (anos)</label><input id="metaPrazo" type="number" min="1" max="50" step="1" value="5"></div>
+          <div><label>Rentabilidade anual esperada (%)</label><input id="metaRetorno" type="number" min="0" max="20" step="0.1" value="10"></div>
+          <div><label>Valor inicial já guardado (R$)</label><input id="metaInicial" type="number" min="0" step="100" value="0"></div>
+        </div>
+        <div class="actions"><button class="purple" onclick="atualizarTudo()">Calcular meta</button></div>
+      </section>
+
+      <section class="card col-7">
+        <div class="section-title"><h2>Resultado da meta</h2><span class="badge">Aporte mensal necessário</span></div>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Aporte necessário</div><div id="metaAporteNec" class="value warn">R$ 0</div></div>
+          <div class="kpi"><div class="label">Patrimônio final</div><div id="metaFinal" class="value good">R$ 0</div></div>
+          <div class="kpi"><div class="label">Com aporte atual</div><div id="metaComAtual" class="value info">R$ 0</div></div>
+          <div class="kpi"><div class="label">Viabilidade</div><div id="metaViabilidade" class="value danger">—</div></div>
+        </div>
+        <div id="metaNotas"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ ABA: COMPARADOR ══════════════ -->
+  <div id="comparador" class="tab">
+    <div class="split">
+      <section class="card">
+        <div class="section-title"><h2>Salvar cenários</h2><span class="badge">LocalStorage</span></div>
+        <p>Salve cenários diferentes para comparar idade, aporte, renda desejada e meta de aposentadoria.</p>
+        <div class="actions">
+          <button onclick="salvarCenario()">Salvar cenário atual</button>
+          <button class="secondary" onclick="limparCenarios()">Limpar cenários</button>
+        </div>
+        <div class="small" style="margin-top:8px;">Os cenários ficam salvos apenas neste navegador.</div>
+      </section>
+      <section class="card">
+        <div class="section-title"><h2>Cenários salvos</h2><span class="badge">Comparação</span></div>
+        <div id="listaCenarios" class="scenario-list"></div>
+      </section>
+    </div>
+    <div class="grid" style="margin-top:16px;">
+      <section class="card col-12">
+        <div class="section-title"><h2>Tabela comparativa</h2><span class="badge">Decisão</span></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th><th>Idade atual</th><th>Idade alvo</th>
+                <th>Renda desejada</th><th>Aporte atual</th>
+                <th>Aporte necessário</th><th>Renda projetada</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaComparador"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════════
+//  FORMATADORES
+// ═══════════════════════════════════════════════
+const brl = new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL', maximumFractionDigits:0 });
+const pct = new Intl.NumberFormat('pt-BR', { maximumFractionDigits:1 });
+const fmtBRL = v => brl.format(isFinite(v) ? v : 0);
+const fmtPct = v => pct.format(isFinite(v) ? v : 0) + '%';
+
+// ═══════════════════════════════════════════════
+//  API BACEN — 5 CAMADAS DE RESILIÊNCIA
+// ═══════════════════════════════════════════════
+const FALLBACK = { selic: 14.75, ipca: 4.14, cdi: 14.65 };
+const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 horas
+
+// Camada 4 — Cache em localStorage
+function lerCache(chave) {
+  try {
+    const item = JSON.parse(localStorage.getItem(chave));
+    if (item && (Date.now() - item.ts) < CACHE_TTL) return item.valor;
+  } catch {}
+  return null;
+}
+function salvarCacheIndicador(chave, valor) {
+  try { localStorage.setItem(chave, JSON.stringify({ valor, ts: Date.now() })); } catch {}
+}
+
+// Camada 2+3 — fetch com timeout e retry com backoff
+async function buscarComRetry(serie, fallback, tentativas, espera) {
+  tentativas = tentativas || 3;
+  espera = espera || 2000;
+  const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${serie}/dados/ultimos/1?formato=json`;
+  for (let i = 0; i < tentativas; i++) {
+    try {
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+      const res = await Promise.race([fetch(url), timeout]);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      return parseFloat(data[0].valor);
+    } catch (e) {
+      if (i < tentativas - 1) {
+        await new Promise(r => setTimeout(r, espera * (i + 1)));
+      }
+    }
+  }
+  return null; // falhou tudo
+}
+
+// Camada 1 — cache → fetch → fallback
+async function buscarIndicador(serie, fallback) {
+  const chave = 'bacen_' + serie;
+  const cached = lerCache(chave);
+  if (cached !== null) return { valor: cached, fonte: 'cache' };
+
+  const valor = await buscarComRetry(serie, fallback);
+  if (valor !== null) {
+    salvarCacheIndicador(chave, valor);
+    return { valor, fonte: 'bacen' };
+  }
+  return { valor: fallback, fonte: 'fallback' };
+}
+
+// Camada 5 — banner de status
+function renderBanner(selic, ipca, cdi, fontes) {
+  const banner = document.getElementById('banner-bacen');
+  const algumFallback = fontes.some(f => f === 'fallback');
+  const algumCache = fontes.some(f => f === 'cache') && !algumFallback;
+  const agora = new Date().toLocaleString('pt-BR');
+
+  if (!algumFallback) {
+    const src = algumCache ? 'cache · atualizado hoje' : agora + ' · BACEN';
+    const dotClass = algumCache ? 'green' : 'green';
+    banner.innerHTML = `<span class="dot ${dotClass}"></span>
+      Selic <strong>${selic.toFixed(2).replace('.',',')}%</strong> ·
+      IPCA 12m <strong>${ipca.toFixed(2).replace('.',',')}%</strong> ·
+      CDI <strong>${cdi.toFixed(2).replace('.',',')}%</strong> ·
+      ${src}`;
+    banner.className = 'banner ok';
+  } else {
+    banner.innerHTML = `<span class="dot yellow"></span>
+      API do BACEN indisponível — usando valores de referência.
+      Selic <strong>${selic.toFixed(2).replace('.',',')}%</strong> ·
+      IPCA <strong>${ipca.toFixed(2).replace('.',',')}%</strong> ·
+      <a href="#" onclick="tentarNovamente();return false;">Tentar novamente</a>`;
+    banner.className = 'banner warn';
+  }
+}
+
+// Atualizar hints nos inputs
+function atualizarHints(selic, ipca, cdi) {
+  const s = v => v.toFixed(2).replace('.', ',');
+  const elSelic = document.getElementById('hintSelicVal');
+  const elCdi   = document.getElementById('hintCdiVal');
+  const elIpca  = document.getElementById('hintIpcaVal');
+  if (elSelic) elSelic.textContent = s(selic);
+  if (elCdi)   elCdi.textContent   = s(cdi);
+  if (elIpca)  elIpca.textContent  = s(ipca);
+}
+
+// Carga principal
+let indicadoresBACEN = { selic: FALLBACK.selic, ipca: FALLBACK.ipca, cdi: FALLBACK.cdi };
+
+async function carregarIndicadoresBACEN() {
+  const banner = document.getElementById('banner-bacen');
+  banner.innerHTML = '<span class="dot gray"></span> Buscando indicadores do Banco Central…';
+  banner.className = 'banner loading';
+
+  // Selic=11, IPCA12m=13522, CDI=12
+  const [rSelic, rIpca, rCdi] = await Promise.all([
+    buscarIndicador(11, FALLBACK.selic),
+    buscarIndicador(13522, FALLBACK.ipca),
+    buscarIndicador(12, FALLBACK.cdi),
+  ]);
+
+  indicadoresBACEN = { selic: rSelic.valor, ipca: rIpca.valor, cdi: rCdi.valor };
+
+  renderBanner(rSelic.valor, rIpca.valor, rCdi.valor, [rSelic.fonte, rIpca.fonte, rCdi.fonte]);
+  atualizarHints(rSelic.valor, rIpca.valor, rCdi.valor);
+  atualizarTudo();
+}
+
+async function tentarNovamente() {
+  ['bacen_11','bacen_13522','bacen_12'].forEach(k => localStorage.removeItem(k));
+  await carregarIndicadoresBACEN();
+}
+
+// ═══════════════════════════════════════════════
+//  NAVEGAÇÃO POR ABAS
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  MATEMÁTICA FINANCEIRA
+// ═══════════════════════════════════════════════
+function monthlyRate(annualPct) { return Math.pow(1 + annualPct / 100, 1/12) - 1; }
+function effectiveRealRate(nominal, inflacao) { return ((1 + nominal/100) / (1 + inflacao/100) - 1) * 100; }
+function capitalNecessario(rendaMensal, tsrPct) { return (rendaMensal * 12) / (tsrPct / 100); }
+function rendaSuportadaMensal(capital, tsrPct) { return capital * (tsrPct / 100) / 12; }
+
+function futureValueGrowing(current, monthlyContrib, months, r, g) {
+  let balance = current, c = monthlyContrib, totalContrib = 0;
+  const series = [balance], totals = [0];
+  for (let m = 1; m <= months; m++) {
+    balance = balance * (1 + r) + c;
+    totalContrib += c;
+    series.push(balance);
+    totals.push(totalContrib);
+    c *= (1 + g);
+  }
+  return { final: balance, series, totals };
+}
+
+function aporteNecessario(target, current, years, annualPct, annualGrowthPct) {
+  const months = Math.round(Math.max(0, years) * 12);
+  if (months === 0) return 0;
+  const r = monthlyRate(annualPct);
+  const g = monthlyRate(annualGrowthPct);
+  const fvCurrent = current * Math.pow(1 + r, months);
+  if (fvCurrent >= target) return 0;
+  let low = 0, high = 1000000;
+  for (let i = 0; i < 80; i++) {
+    const mid = (low + high) / 2;
+    const fv = futureValueGrowing(current, mid, months, r, g).final;
+    if (fv >= target) high = mid; else low = mid;
+  }
+  return high;
+}
+
+function compact(v) {
+  if (v >= 1_000_000) return 'R$ ' + (v/1_000_000).toFixed(1).replace('.',',') + ' mi';
+  if (v >= 1_000) return 'R$ ' + Math.round(v/1000) + ' mil';
+  return 'R$ ' + Math.round(v);
+}
+
+// ═══════════════════════════════════════════════
+//  GRÁFICO CANVAS
+// ═══════════════════════════════════════════════
+function desenharGrafico(canvasId, patrimonioSeries, target, aportadoSeries, idadeAtual) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = '#0b1220'; ctx.fillRect(0,0,w,h);
+
+  const pad = { l:66, r:24, t:24, b:34 };
+  const maxY = Math.max(target, ...patrimonioSeries, ...(aportadoSeries || [0])) * 1.08 || 1;
+  const xCount = patrimonioSeries.length - 1 || 1;
+  const X = i => pad.l + (i / xCount) * (w - pad.l - pad.r);
+  const Y = v => h - pad.b - (v / maxY) * (h - pad.t - pad.b);
+
+  // Grade
+  ctx.strokeStyle = '#243247'; ctx.lineWidth = 1;
+  for (let i=0; i<=5; i++) {
+    const yy = pad.t + i * ((h-pad.t-pad.b)/5);
+    ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(w-pad.r, yy); ctx.stroke();
+  }
+  ctx.fillStyle = '#94a3b8'; ctx.font = '12px Arial';
+  for (let i=0; i<=5; i++) {
+    const val = maxY - i*(maxY/5);
+    ctx.fillText(compact(val), 8, pad.t + i*((h-pad.t-pad.b)/5) + 4);
+  }
+
+  // Linha meta (tracejada azul)
+  ctx.setLineDash([7,5]); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(X(0), Y(target)); ctx.lineTo(X(xCount), Y(target)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Linha total aportado (roxa)
+  if (aportadoSeries && aportadoSeries.length) {
+    ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    aportadoSeries.forEach((v,i) => i===0 ? ctx.moveTo(X(i),Y(v)) : ctx.lineTo(X(i),Y(v)));
+    ctx.stroke();
+  }
+
+  // Linha patrimônio (verde)
+  ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2.6;
+  ctx.beginPath();
+  patrimonioSeries.forEach((v,i) => i===0 ? ctx.moveTo(X(i),Y(v)) : ctx.lineTo(X(i),Y(v)));
+  ctx.stroke();
+
+  // Rótulos eixo X (idades)
+  const steps = Math.min(6, xCount);
+  ctx.fillStyle = '#94a3b8'; ctx.font = '12px Arial';
+  for (let i=0; i<=steps; i++) {
+    const idx = Math.round((xCount/steps)*i);
+    const idade = Math.round(idadeAtual + idx/12);
+    ctx.fillText(String(idade), X(idx)-8, h-10);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  LEITURA DE DADOS DOS INPUTS
+// ═══════════════════════════════════════════════
+function getData() {
+  const g = id => Number(document.getElementById(id).value || 0);
+  return {
+    idadeAtual:        g('idadeAtual'),
+    idadeApos:         g('idadeApos'),
+    rendaLiquida:      g('rendaLiquida'),
+    despesas:          g('despesas'),
+    patrimonioAtual:   g('patrimonioAtual'),
+    aporteAtual:       g('aporteAtual'),
+    perfilRenda:       document.getElementById('perfilRenda').value,
+    mesesReserva:      g('mesesReserva') || 6,
+    rendaDesejada:     g('rendaDesejada'),
+    tsr:               g('tsr') || 4,
+    retornoNominal:    g('retornoNominal') || 10,
+    inflacao:          g('inflacao') || 4,
+    crescimentoAporte: g('crescimentoAporte'),
+    modoCalculo:       document.getElementById('modoCalculo').value,
+    metaValor:         g('metaValor'),
+    metaPrazo:         g('metaPrazo') || 1,
+    metaRetorno:       g('metaRetorno') || 10,
+    metaInicial:       g('metaInicial'),
+  };
+}
+
+// ═══════════════════════════════════════════════
+//  TEXTOS AUXILIARES
+// ═══════════════════════════════════════════════
+function reservaTexto(perfil, meses) {
+  if (perfil === 'clt')     return meses >= 3 && meses <= 6   ? 'Faixa coerente para renda estável.'  : 'Para renda estável, 3 a 6 meses tende a ser a referência-base.';
+  if (perfil === 'pj')      return meses >= 6 && meses <= 12  ? 'Faixa coerente para PJ/autônomo.'    : 'Para PJ/autônomo, 6 a 12 meses costuma ser mais prudente.';
+  return meses >= 12 ? 'Faixa coerente para renda variável.' : 'Para renda variável, 12 meses ou mais costuma ser mais seguro.';
+}
+
+// ═══════════════════════════════════════════════
+//  ATUALIZAÇÃO GERAL
+// ═══════════════════════════════════════════════
+function atualizarTudo() {
+  const d = getData();
+  const anos = Math.max(0, d.idadeApos - d.idadeAtual);
+  const meses = Math.round(anos * 12);
+  const retornoUsado = d.modoCalculo === 'real'
+    ? effectiveRealRate(d.retornoNominal, d.inflacao)
+    : d.retornoNominal;
+  const r = monthlyRate(retornoUsado);
+  const g = monthlyRate(d.crescimentoAporte);
+
+  const capitalMeta = capitalNecessario(d.rendaDesejada, d.tsr);
+  const proj = futureValueGrowing(d.patrimonioAtual, d.aporteAtual, meses, r, g);
+  const rendaProj = rendaSuportadaMensal(proj.final, d.tsr);
+  const aporteReq = aporteNecessario(capitalMeta, d.patrimonioAtual, anos, retornoUsado, d.crescimentoAporte);
+
+  const poupanca    = d.rendaLiquida > 0 ? d.aporteAtual / d.rendaLiquida * 100 : 0;
+  const reservaIdeal = d.despesas * d.mesesReserva;
+  const tempoReserva = d.aporteAtual > 0 ? reservaIdeal / d.aporteAtual : Infinity;
+  const folga        = d.rendaLiquida - d.despesas - d.aporteAtual;
+
+  // ── Plano Base ──
+  const el = id => document.getElementById(id);
+  el('orc50').textContent = fmtBRL(d.rendaLiquida * 0.5);
+  el('orc30').textContent = fmtBRL(d.rendaLiquida * 0.3);
+  el('orc20').textContent = fmtBRL(d.rendaLiquida * 0.2);
+  el('kpiPoupanca').textContent    = fmtPct(poupanca);
+  el('kpiReservaIdeal').textContent = fmtBRL(reservaIdeal);
+  el('kpiTempoReserva').textContent = isFinite(tempoReserva) ? tempoReserva.toFixed(1).replace('.',',') + ' meses' : 'Sem aporte';
+  el('kpiFolga').textContent       = fmtBRL(folga);
+
+  el('planoNotas').innerHTML = [
+    `<div class="recommend ${poupanca >= 20 ? 'green' : 'warn'}"><strong>Taxa de poupança:</strong> ${fmtPct(poupanca)}. A referência clássica costuma começar em 20%.</div>`,
+    `<div class="recommend"><strong>Reserva:</strong> ${reservaTexto(d.perfilRenda, d.mesesReserva)}</div>`,
+  ].join('');
+
+  // ── Aposentadoria ──
+  el('kpiAnos').textContent      = anos + ' anos';
+  el('kpiCapital').textContent   = fmtBRL(capitalMeta);
+  el('kpiAporteNec').textContent = fmtBRL(aporteReq);
+  el('kpiRendaProj').textContent = fmtBRL(rendaProj);
+
+  el('aposNotas').innerHTML = [
+    `<div class="recommend"><strong>Retorno usado:</strong> ${fmtPct(retornoUsado)} ao ano em modo ${d.modoCalculo === 'real' ? 'real' : 'nominal'}.</div>`,
+    `<div class="recommend"><strong>Leitura:</strong> quanto capital e aporte são necessários para sustentar R$ ${fmtBRL(d.rendaDesejada).replace('R$\u00a0','')} a partir dos ${d.idadeApos} anos.</div>`,
+  ].join('');
+
+  let diag = '';
+  if (proj.final >= capitalMeta) {
+    diag = `<div class="recommend green"><strong>Cenário viável:</strong> com os parâmetros atuais, a projeção já alcança ou supera o capital necessário.</div>`;
+  } else if (aporteReq <= d.rendaLiquida * 0.2) {
+    diag = `<div class="recommend green"><strong>Meta plausível:</strong> o aporte necessário está em uma faixa saudável frente à renda atual.</div>`;
+  } else if (aporteReq <= d.rendaLiquida * 0.35) {
+    diag = `<div class="recommend warn"><strong>Meta apertada:</strong> será preciso elevar aporte, prazo ou renda para tornar o plano confortável.</div>`;
+  } else {
+    diag = `<div class="recommend red"><strong>Meta agressiva:</strong> do jeito atual, a meta depende de mudanças relevantes de renda, prazo ou expectativa.</div>`;
+  }
+  el('diagnostico').innerHTML = diag;
+
+  desenharGrafico('graficoApos', proj.series, capitalMeta, proj.totals, d.idadeAtual);
+
+  const starts = [20,25,30,35,40,45,50].filter(age => age < d.idadeApos);
+  const tBody = el('tabelaPartidas');
+  tBody.innerHTML = '';
+  starts.forEach(startAge => {
+    const yrs = d.idadeApos - startAge;
+    const ap  = aporteNecessario(capitalMeta, d.patrimonioAtual, yrs, retornoUsado, d.crescimentoAporte);
+    const tr  = document.createElement('tr');
+    tr.innerHTML = `<td>${startAge}</td><td>${yrs} anos</td><td>${fmtBRL(ap)}</td><td>${fmtBRL(capitalMeta)}</td>`;
+    tBody.appendChild(tr);
+  });
+
+  // ── Reserva ──
+  el('rvDespesas').textContent = fmtBRL(d.despesas);
+  el('rvMeses').textContent    = d.mesesReserva + ' meses';
+  el('rvIdeal').textContent    = fmtBRL(reservaIdeal);
+  el('rvTempo').textContent    = isFinite(tempoReserva) ? tempoReserva.toFixed(1).replace('.',',') + ' meses' : 'Não definido';
+  el('rvNotas').innerHTML      = `<div class="recommend"><strong>Faixa sugerida:</strong> ${reservaTexto(d.perfilRenda, d.mesesReserva)}</div>`;
+  el('rvRecs').innerHTML = [
+    `<div class="recommend"><strong>Passo 1:</strong> monte a reserva antes de sofisticar a carteira.</div>`,
+    `<div class="recommend"><strong>Passo 2:</strong> priorize reduzir gastos fixos e elevar renda.</div>`,
+    `<div class="recommend"><strong>Passo 3:</strong> use liquidez diária para emergências, não ativos voláteis.</div>`,
+  ].join('');
+
+  // ── Metas ──
+  const metaMonths  = Math.round(d.metaPrazo * 12);
+  const metaR       = monthlyRate(d.metaRetorno);
+  const metaProjAt  = futureValueGrowing(d.metaInicial, d.aporteAtual, metaMonths, metaR, 0).final;
+  const metaAporte  = aporteNecessario(d.metaValor, d.metaInicial, d.metaPrazo, d.metaRetorno, 0);
+  el('metaAporteNec').textContent  = fmtBRL(metaAporte);
+  el('metaFinal').textContent      = fmtBRL(d.metaValor);
+  el('metaComAtual').textContent   = fmtBRL(metaProjAt);
+  el('metaViabilidade').textContent = metaProjAt >= d.metaValor ? 'Alta' : (metaAporte <= d.rendaLiquida * 0.2 ? 'Média' : 'Baixa');
+  el('metaNotas').innerHTML = metaProjAt >= d.metaValor
+    ? `<div class="recommend green"><strong>Meta viável:</strong> com o aporte atual, o objetivo tende a ser alcançado no prazo.</div>`
+    : `<div class="recommend warn"><strong>Meta exige ajuste:</strong> para atingir ${fmtBRL(d.metaValor)} em ${d.metaPrazo} anos, o aporte de referência é ${fmtBRL(metaAporte)}.</div>`;
+
+  // ── Comparador ──
+  renderComparador();
+}
+
+// ═══════════════════════════════════════════════
+//  COMPARADOR DE CENÁRIOS
+// ═══════════════════════════════════════════════
+function currentScenarioSummary() {
+  const d = getData();
+  const anos = Math.max(0, d.idadeApos - d.idadeAtual);
+  const retornoUsado = d.modoCalculo === 'real'
+    ? effectiveRealRate(d.retornoNominal, d.inflacao)
+    : d.retornoNominal;
+  const capitalMeta = capitalNecessario(d.rendaDesejada, d.tsr);
+  const aporteReq   = aporteNecessario(capitalMeta, d.patrimonioAtual, anos, retornoUsado, d.crescimentoAporte);
+  const proj        = futureValueGrowing(d.patrimonioAtual, d.aporteAtual, anos*12, monthlyRate(retornoUsado), monthlyRate(d.crescimentoAporte));
+  return { ...d, anos, capitalMeta, aporteReq, rendaProj: rendaSuportadaMensal(proj.final, d.tsr) };
+}
+
+function salvarCenario() {
+  const nome = prompt('Nome do cenário:');
+  if (!nome) return;
+  const scen = currentScenarioSummary();
+  scen.nome = nome;
+  const list = JSON.parse(localStorage.getItem('cenariosFinanceirosV2') || '[]');
+  list.push(scen);
+  localStorage.setItem('cenariosFinanceirosV2', JSON.stringify(list));
+  renderComparador();
+}
+
+function limparCenarios() {
+  localStorage.removeItem('cenariosFinanceirosV2');
+  renderComparador();
+}
+
+function carregarCenario(index) {
+  const list = JSON.parse(localStorage.getItem('cenariosFinanceirosV2') || '[]');
+  const s = list[index];
+  if (!s) return;
+  const ids = ['idadeAtual','idadeApos','rendaLiquida','despesas','patrimonioAtual','aporteAtual',
+    'mesesReserva','rendaDesejada','tsr','retornoNominal','inflacao','crescimentoAporte',
+    'metaValor','metaPrazo','metaRetorno','metaInicial'];
+  ids.forEach(id => { if (s[id] !== undefined) document.getElementById(id).value = s[id]; });
+  document.getElementById('perfilRenda').value = s.perfilRenda || 'clt';
+  document.getElementById('modoCalculo').value = s.modoCalculo || 'real';
+  atualizarTudo();
+}
+
+function excluirCenario(index) {
+  const list = JSON.parse(localStorage.getItem('cenariosFinanceirosV2') || '[]');
+  list.splice(index, 1);
+  localStorage.setItem('cenariosFinanceirosV2', JSON.stringify(list));
+  renderComparador();
+}
+
+function renderComparador() {
+  const list = JSON.parse(localStorage.getItem('cenariosFinanceirosV2') || '[]');
+  const box   = document.getElementById('listaCenarios');
+  const table = document.getElementById('tabelaComparador');
+  box.innerHTML = '';
+  table.innerHTML = '';
+  if (!list.length) {
+    box.innerHTML = '<div class="small">Nenhum cenário salvo ainda.</div>';
+    return;
+  }
+  list.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'scenario-item';
+    item.innerHTML = `<div>
+        <strong>${s.nome}</strong>
+        <div class="small">${s.idadeAtual} → ${s.idadeApos} anos · Meta ${fmtBRL(s.rendaDesejada)}/mês</div>
+      </div>
+      <div class="row-actions">
+        <button class="secondary" onclick="carregarCenario(${i})">Carregar</button>
+        <button class="secondary" onclick="excluirCenario(${i})">Excluir</button>
+      </div>`;
+    box.appendChild(item);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.nome}</td><td>${s.idadeAtual}</td><td>${s.idadeApos}</td>
+      <td>${fmtBRL(s.rendaDesejada)}</td><td>${fmtBRL(s.aporteAtual)}</td>
+      <td>${fmtBRL(s.aporteReq)}</td><td>${fmtBRL(s.rendaProj)}</td>`;
+    table.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  RESET
+// ═══════════════════════════════════════════════
+function resetarPadrao() {
+  const vals = {
+    idadeAtual:20, idadeApos:60, rendaLiquida:1750, despesas:1400,
+    patrimonioAtual:0, aporteAtual:350, mesesReserva:6, rendaDesejada:5000,
+    tsr:4, retornoNominal:10, inflacao:4, crescimentoAporte:3,
+    metaValor:50000, metaPrazo:5, metaRetorno:10, metaInicial:0
+  };
+  Object.entries(vals).forEach(([id, v]) => { document.getElementById(id).value = v; });
+  document.getElementById('perfilRenda').value = 'clt';
+  document.getElementById('modoCalculo').value = 'real';
+  atualizarTudo();
+}
+
+// ═══════════════════════════════════════════════
+//  INICIALIZAÇÃO
+// ═══════════════════════════════════════════════
+atualizarTudo();       // renderiza com valores padrão imediatamente
+renderComparador();    // carrega cenários salvos
+carregarIndicadoresBACEN(); // busca BACEN em paralelo (atualiza hints e banner)
+</script>
+</body>
+</html>
